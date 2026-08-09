@@ -1,5 +1,5 @@
 {
-  "$schema": "./config.schema.json",
+  "$schema": "https://raw.githubusercontent.com/SNMetamorph/icecast2mqtt/refs/heads/master/config.schema.json",
   "mqtt": {
     "client_id": "icecast2mqtt",
     "base_topic": "icecast2mqtt",
