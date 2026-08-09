@@ -9,19 +9,13 @@ import (
 	"runtime"
 	"syscall"
 
+	"icecast2mqtt/internal/buildinfo"
 	"icecast2mqtt/internal/config"
 	"icecast2mqtt/internal/fetcher"
 	"icecast2mqtt/internal/publisher"
 	"icecast2mqtt/internal/worker"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-)
-
-var (
-	version = "dev"
-	commit  = "unknown"
-	date    = "unknown"
-	author  = "unknown"
 )
 
 func main() {
@@ -75,7 +69,7 @@ func main() {
 func banner() {
 	fmt.Printf("\n")
 	fmt.Printf("  icecast2mqtt - MQTT bridge for Icecast radio streams, compatible with Home Assistant\n")
-	fmt.Printf("  Version      : %s (%s / %s / %s / %s)\n", version, date, commit, runtime.GOARCH, runtime.GOOS)
+	fmt.Printf("  Version      : %s (%s / %s / %s / %s)\n", buildinfo.Version, buildinfo.Date, buildinfo.Commit, runtime.GOARCH, runtime.GOOS)
 	fmt.Printf("  Website      : https://github.com/SNMetamorph/icecast2mqtt\n")
 	fmt.Printf("\n")
 }

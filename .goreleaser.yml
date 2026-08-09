@@ -10,10 +10,9 @@ builds:
       - CGO_ENABLED=0
     ldflags:
       - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commit={{.ShortCommit}}
-      - -X main.date={{.Date}}
-      - -X main.author=SNMetamorph
+      - -X icecast2mqtt/internal/buildinfo.Version={{.Version}}
+      - -X icecast2mqtt/internal/buildinfo.Commit={{.ShortCommit}}
+      - -X icecast2mqtt/internal/buildinfo.Date={{.Date}}
     goos:
       - linux
       - windows
