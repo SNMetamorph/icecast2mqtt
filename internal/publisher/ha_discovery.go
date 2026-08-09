@@ -1,0 +1,112 @@
+package publisher
+
+import (
+	"encoding/json"
+	"fmt"
+	"icecast2mqtt/internal/config"
+	"icecast2mqtt/internal/icestats"
+	"log"
+)
+
+var origin = HADeviceOrigin{
+	Name:            "icecast2mqtt",
+	SoftwareVersion: "0.1.0",
+	URL:             "https://github.com/SNMetamorph/icecast2mqtt",
+}
+
+type HADiscoveryPayload struct {
+	Name              string          `json:"name"`
+	StateTopic        string          `json:"state_topic"`
+	UniqueTopicID     string          `json:"unique_id"`
+	UnitOfMeasurement string          `json:"unit_of_measurement,omitempty"`
+	EntityCategory    string          `json:"entity_category,omitempty"`
+	DeviceClass       string          `json:"device_class,omitempty"`
+	StateClass        string          `json:"state_class,omitempty"`
+	Icon              string          `json:"icon,omitempty"`
+	Origin            *HADeviceOrigin `json:"origin,omitempty"`
+	Device            HADevice        `json:"device"`
+}
+
+type HADeviceOrigin struct {
+	Name            string `json:"name"`
+	SoftwareVersion string `json:"sw"`
+	URL             string `json:"url"`
+}
+
+type HADevice struct {
+	Identifiers     []string `json:"identifiers"`
+	Name            string   `json:"name"`
+	SoftwareVersion string   `json:"sw_version,omitempty"`
+	Manufactuter    string   `json:"manufacturer,omitempty"`
+	Model           string   `json:"model,omitempty"`
+}
+
+func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg config.TargetConfigEntry, stats *icestats.IcestatsObject) {
+	device := HADevice{
+		Identifiers:     []string{cfg.HADiscovery.DeviceID},
+		Name:            cfg.HADiscovery.DeviceName,
+		SoftwareVersion: stats.ServerID,
+		Manufactuter:    "SNMetamorph",
+		Model:           "icecast2mqtt",
+	}
+
+	for _, s := range serverMetrics {
+		discoveryTopic := fmt.Sprintf("%s/sensor/%s/%s/config", prefix, cfg.HADiscovery.DeviceID, s.SubTopic)
+		stateTopic := fmt.Sprintf("%s/%s/%s", baseTopic, cfg.MQTTTopic, s.SubTopic)
+
+		payload := HADiscoveryPayload{
+			Name:              fmt.Sprintf("%s %s", cfg.HADiscovery.DeviceName, s.Name),
+			StateTopic:        stateTopic,
+			UniqueTopicID:     fmt.Sprintf("%s_%s", cfg.HADiscovery.DeviceID, s.SubTopic),
+			DeviceClass:       s.DeviceClass,
+			StateClass:        s.StateClass,
+			EntityCategory:    "diagnostic",
+			UnitOfMeasurement: s.Unit,
+			Icon:              s.Icon,
+			Device:            device,
+			Origin:            &origin,
+		}
+
+		data, err := json.Marshal(payload)
+		if err != nil {
+			log.Printf("[ERROR] Failed to marshal HA discovery payload: %v", err)
+			continue
+		}
+
+		token := p.client.Publish(discoveryTopic, 1, true, data)
+		token.Wait()
+		if token.Error() != nil {
+			log.Printf("[ERROR] Failed to publish HA Discovery to %s: %v", discoveryTopic, token.Error())
+		}
+	}
+
+	for _, source := range stats.Sources {
+		for _, s := range streamMetrics {
+			discoveryTopic := fmt.Sprintf("%s/sensor/%s/%s_%s/config", prefix, cfg.HADiscovery.DeviceID, source.GetMountpoint(), s.SubTopic)
+			stateTopic := fmt.Sprintf("%s/%s/%s/%s", baseTopic, cfg.MQTTTopic, source.GetMountpoint(), s.SubTopic)
+
+			payload := HADiscoveryPayload{
+				Name:              fmt.Sprintf("%s %s", source.GetMountpoint(), s.Name),
+				StateTopic:        stateTopic,
+				UniqueTopicID:     fmt.Sprintf("%s_%s_%s", cfg.HADiscovery.DeviceID, source.GetMountpoint(), s.SubTopic),
+				DeviceClass:       s.DeviceClass,
+				StateClass:        s.StateClass,
+				UnitOfMeasurement: s.Unit,
+				Icon:              s.Icon,
+				Device:            device,
+			}
+
+			data, err := json.Marshal(payload)
+			if err != nil {
+				log.Printf("[ERROR] Failed to marshal HA discovery payload: %v", err)
+				continue
+			}
+
+			token := p.client.Publish(discoveryTopic, 1, true, data)
+			token.Wait()
+			if token.Error() != nil {
+				log.Printf("[ERROR] Failed to publish HA Discovery to %s: %v", discoveryTopic, token.Error())
+			}
+		}
+	}
+}

@@ -1,0 +1,60 @@
+# --- General Go ---
+
+# Binaries (always ignore, regardless of location)
+*.exe
+*.exe.*
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.prof
+
+# Build output
+/bin/
+/dist/
+/build/
+
+# Go workspace / tooling
+go.work
+go.work.sum
+
+# Cover/profiling artifacts
+coverage.*
+*.coverprofile
+
+# --- OS / Editors ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# --- Environment / Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Project specifics (remove what does not apply) ---
+# Local runtime configuration; keep only a template in VCS
+config.json
+
+# Local MQTT certificates / keys
+*.pem
+*.crt
+*.key

@@ -1,0 +1,33 @@
+{
+  "$schema": "./config.schema.json",
+  "mqtt": {
+    "client_id": "icecast2mqtt",
+    "base_topic": "icecast2mqtt",
+    "ha_autodiscovery_prefix": "homeassistant"
+  },
+  "targets": [
+    {
+        "url": "http://radio.example.com:8000/status-json.xsl",
+        "mqtt_topic": "acid-house",
+        "update_interval": "3000ms",
+        "ha_discovery": {
+          "device_id": "icecast_acid",
+          "device_name": "Acid House Radio"
+        }
+    },
+    {
+        "url": "https://radio.example.com:8001/status-json.xsl",
+        "mqtt_topic": "dnb",
+        "update_interval": "5s",
+        "ha_discovery": {
+          "device_id": "icecast_drumnbass",
+          "device_name": "DnB Radio"
+        }
+    },
+    {
+        "url": "http://radio.example.com:8002/status-json.xsl",
+        "mqtt_topic": "nudisco",
+        "update_interval": "1m"
+    }
+  ]
+}
