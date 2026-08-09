@@ -9,14 +9,15 @@ builds:
     env:
       - CGO_ENABLED=0
     ldflags:
+      # Disable embedding debug information
       - -s -w
+      # Propage build information to compiling stage
       - -X icecast2mqtt/internal/buildinfo.Version={{.Version}}
       - -X icecast2mqtt/internal/buildinfo.Commit={{.ShortCommit}}
       - -X icecast2mqtt/internal/buildinfo.Date={{.Date}}
     goos:
       - linux
       - windows
-      - darwin
     goarch:
       - amd64
       - arm64
