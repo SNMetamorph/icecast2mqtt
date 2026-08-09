@@ -22,6 +22,7 @@ WORKDIR /app
 
 COPY config.schema.json ./
 COPY config.json.example ./
+COPY LICENSE ./
 COPY --from=builder /src/bin/icecast2mqtt /usr/local/bin/icecast2mqtt
 
 USER app

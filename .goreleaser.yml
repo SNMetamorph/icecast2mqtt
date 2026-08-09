@@ -33,6 +33,7 @@ dockers:
     extra_files:
       - config.schema.json
       - config.json.example
+      - LICENSE
 
 archives:
   - formats: [tar.gz, zip]
@@ -40,6 +41,7 @@ archives:
     files:
       - config.json.example
       - config.schema.json
+      - LICENSE
 
 checksum:
   name_template: 'checksums.txt'
