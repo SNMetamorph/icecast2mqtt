@@ -24,8 +24,8 @@ builds:
 
 dockers:
   - image_templates:
-      - "ghcr.io/SNMetamorph/icecast2mqtt:{{ .Version }}"
-      - "ghcr.io/SNMetamorph/icecast2mqtt:latest"
+      - "ghcr.io/snmetamorph/icecast2mqtt:{{ .Version }}"
+      - "ghcr.io/snmetamorph/icecast2mqtt:latest"
     dockerfile: Dockerfile.release
     use: docker
     goos: linux

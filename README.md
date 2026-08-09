@@ -54,7 +54,7 @@ hints while you edit it. A ready-to-fill example lives in
 ```yaml
 services:
   icecast2mqtt:
-    image: ghcr.io/SNMetamorph/icecast2mqtt:latest
+    image: ghcr.io/snmetamorph/icecast2mqtt:latest
     container_name: icecast2mqtt
     restart: unless-stopped
     environment:
