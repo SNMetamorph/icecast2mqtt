@@ -1,0 +1,51 @@
+version: 3
+
+vars:
+  BINARY: icecast2mqtt
+  GOEXE:
+    sh: go env GOEXE
+  MODULE: icecast2mqtt/internal/buildinfo
+  OUTPUT: "bin/{{.BINARY}}{{.GOEXE}}"
+  VERSION:
+    sh: git describe --tags --abbrev=0 || echo dev
+  COMMIT:
+    sh: git rev-parse --short HEAD || echo unknown
+  DATE:
+    sh: git log -1 --format=%cI || echo unknown
+  LDFLAGS: "-s -w -X {{.MODULE}}.Version={{.VERSION}} -X {{.MODULE}}.Commit={{.COMMIT}} -X {{.MODULE}}.Date={{.DATE}}"
+
+env:
+  CGO_ENABLED: "0"
+
+tasks:
+  default:
+    desc: Build the binary
+    cmds:
+      - task: build
+
+  build:
+    desc: Build the binary with injected build metadata
+    cmds:
+      - go build -trimpath -ldflags "{{.LDFLAGS}}" -o {{.OUTPUT}} ./cmd/app
+
+  ldflags:
+    desc: Print the linker flags used by the build
+    silent: true
+    cmds:
+      - echo "{{.LDFLAGS}}"
+
+  image:
+    desc: Build the Docker image
+    cmds:
+      - docker build -t {{.BINARY}}:local .
+
+  release:
+    desc: Run GoReleaser with the tag-based version
+    cmds:
+      - task: build
+      - goreleaser release
+
+  clean:
+    desc: Remove build artefacts
+    cmds:
+      - git clean -xfd bin || echo "nothing to clean"
