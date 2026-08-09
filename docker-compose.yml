@@ -1,0 +1,12 @@
+services:
+  icecast2mqtt:
+    build:
+      context: .
+    container_name: icecast2mqtt
+    restart: unless-stopped
+    environment:
+      MQTT_BROKER: ${MQTT_BROKER:?set MQTT_BROKER in .env}
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+    volumes:
+      - ./config.json:/app/config.json:ro
