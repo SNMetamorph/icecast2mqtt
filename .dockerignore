@@ -1,4 +1,3 @@
-.git
 .vscode
 .idea
 
@@ -14,6 +13,7 @@ config.json
 *.test
 
 Dockerfile
+Dockerfile.release
 docker-compose.yml
 .dockerignore
 

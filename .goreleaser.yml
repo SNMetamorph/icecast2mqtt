@@ -22,6 +22,18 @@ builds:
       - amd64
       - arm64
 
+dockers:
+  - image_templates:
+      - "ghcr.io/SNMetamorph/icecast2mqtt:{{ .Version }}"
+      - "ghcr.io/SNMetamorph/icecast2mqtt:latest"
+    dockerfile: Dockerfile.release
+    use: docker
+    goos: linux
+    goarch: amd64
+    extra_files:
+      - config.schema.json
+      - config.json.example
+
 archives:
   - formats: [tar.gz, zip]
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
