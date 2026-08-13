@@ -26,10 +26,10 @@ import (
 )
 
 type IcecastSourceMetadata struct {
-	Artist      string         `json:"artist"`
-	Title       string         `json:"title"`
-	Album       string         `json:"album,omitempty"`
-	Comment     string         `json:"comment,omitempty"`
+	Artist      FlexibleString `json:"artist"`
+	Title       FlexibleString `json:"title"`
+	Album       FlexibleString `json:"album,omitempty"`
+	Comment     FlexibleString `json:"comment,omitempty"`
 	Date        FlexibleString `json:"date,omitempty"`
 	Genre       FlexibleString `json:"genre,omitempty"`
 	TrackNumber FlexibleString `json:"tracknumber,omitempty"`
