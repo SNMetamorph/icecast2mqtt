@@ -62,15 +62,7 @@ type HADevice struct {
 	Model           string   `json:"model,omitempty"`
 }
 
-func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg config.TargetConfigEntry, stats *icestats.IcestatsObject) {
-	device := HADevice{
-		Identifiers:     []string{cfg.HADiscovery.DeviceID},
-		Name:            cfg.HADiscovery.DeviceName,
-		SoftwareVersion: origin.SoftwareVersion,
-		Manufactuter:    "SNMetamorph",
-		Model:           origin.Name,
-	}
-
+func (p *Publisher) postServerMetrics(baseTopic string, prefix string, cfg config.TargetConfigEntry, device *HADevice) {
 	for _, s := range serverMetrics {
 		discoveryTopic := fmt.Sprintf("%s/sensor/%s/%s/config", prefix, cfg.HADiscovery.DeviceID, s.SubTopic)
 		stateTopic := fmt.Sprintf("%s/%s/%s", baseTopic, cfg.MQTTTopic, s.SubTopic)
@@ -84,7 +76,7 @@ func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg c
 			EntityCategory:    "diagnostic",
 			UnitOfMeasurement: s.Unit,
 			Icon:              s.Icon,
-			Device:            device,
+			Device:            *device,
 			Origin:            &origin,
 		}
 
@@ -100,35 +92,50 @@ func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg c
 			log.Printf("[ERROR] Failed to publish HA Discovery to %s: %v", discoveryTopic, token.Error())
 		}
 	}
+}
 
-	for _, source := range stats.Sources {
-		for _, s := range streamMetrics {
-			discoveryTopic := fmt.Sprintf("%s/sensor/%s/%s_%s/config", prefix, cfg.HADiscovery.DeviceID, source.GetMountpoint(), s.SubTopic)
-			stateTopic := fmt.Sprintf("%s/%s/%s/%s", baseTopic, cfg.MQTTTopic, source.GetMountpoint(), s.SubTopic)
+func (p *Publisher) postStreamMetrics(baseTopic string, prefix string, cfg config.TargetConfigEntry, stream *icestats.IcecastSource, device *HADevice) {
+	for _, s := range streamMetrics {
+		discoveryTopic := fmt.Sprintf("%s/sensor/%s/%s_%s/config", prefix, cfg.HADiscovery.DeviceID, stream.GetMountpoint(), s.SubTopic)
+		stateTopic := fmt.Sprintf("%s/%s/%s/%s", baseTopic, cfg.MQTTTopic, stream.GetMountpoint(), s.SubTopic)
 
-			payload := HADiscoveryPayload{
-				Name:              fmt.Sprintf("%s %s", source.GetMountpoint(), s.Name),
-				StateTopic:        stateTopic,
-				UniqueTopicID:     fmt.Sprintf("%s_%s_%s", cfg.HADiscovery.DeviceID, source.GetMountpoint(), s.SubTopic),
-				DeviceClass:       s.DeviceClass,
-				StateClass:        s.StateClass,
-				UnitOfMeasurement: s.Unit,
-				Icon:              s.Icon,
-				Device:            device,
-				Origin:            &origin,
-			}
-
-			data, err := json.Marshal(payload)
-			if err != nil {
-				log.Printf("[ERROR] Failed to marshal HA discovery payload: %v", err)
-				continue
-			}
-
-			token := p.client.Publish(discoveryTopic, 1, true, data)
-			token.Wait()
-			if token.Error() != nil {
-				log.Printf("[ERROR] Failed to publish HA Discovery to %s: %v", discoveryTopic, token.Error())
-			}
+		payload := HADiscoveryPayload{
+			Name:              fmt.Sprintf("%s %s", stream.GetMountpoint(), s.Name),
+			StateTopic:        stateTopic,
+			UniqueTopicID:     fmt.Sprintf("%s_%s_%s", cfg.HADiscovery.DeviceID, stream.GetMountpoint(), s.SubTopic),
+			DeviceClass:       s.DeviceClass,
+			StateClass:        s.StateClass,
+			UnitOfMeasurement: s.Unit,
+			Icon:              s.Icon,
+			Device:            *device,
+			Origin:            &origin,
 		}
+
+		data, err := json.Marshal(payload)
+		if err != nil {
+			log.Printf("[ERROR] Failed to marshal HA discovery payload: %v", err)
+			continue
+		}
+
+		token := p.client.Publish(discoveryTopic, 1, true, data)
+		token.Wait()
+		if token.Error() != nil {
+			log.Printf("[ERROR] Failed to publish HA Discovery to %s: %v", discoveryTopic, token.Error())
+		}
+	}
+}
+
+func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg config.TargetConfigEntry, stats *icestats.IcestatsObject) {
+	device := HADevice{
+		Identifiers:     []string{cfg.HADiscovery.DeviceID},
+		Name:            cfg.HADiscovery.DeviceName,
+		SoftwareVersion: origin.SoftwareVersion,
+		Manufactuter:    "SNMetamorph",
+		Model:           origin.Name,
+	}
+
+	p.postServerMetrics(baseTopic, prefix, cfg, &device)
+	for _, source := range stats.Sources {
+		p.postStreamMetrics(baseTopic, prefix, cfg, &source, &device)
 	}
 }
