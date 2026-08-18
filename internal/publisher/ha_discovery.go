@@ -22,14 +22,16 @@ package publisher
 import (
 	"encoding/json"
 	"fmt"
+	"icecast2mqtt/internal/buildinfo"
 	"icecast2mqtt/internal/config"
 	"icecast2mqtt/internal/icestats"
 	"log"
+	"runtime"
 )
 
 var origin = HADeviceOrigin{
 	Name:            "icecast2mqtt",
-	SoftwareVersion: "0.1.0",
+	SoftwareVersion: fmt.Sprintf("%s (%s / %s / %s / %s)", buildinfo.Version, buildinfo.Date, buildinfo.Commit, runtime.GOARCH, runtime.GOOS),
 	URL:             "https://github.com/SNMetamorph/icecast2mqtt",
 }
 
