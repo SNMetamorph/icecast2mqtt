@@ -66,9 +66,9 @@ func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg c
 	device := HADevice{
 		Identifiers:     []string{cfg.HADiscovery.DeviceID},
 		Name:            cfg.HADiscovery.DeviceName,
-		SoftwareVersion: stats.ServerID,
+		SoftwareVersion: origin.SoftwareVersion,
 		Manufactuter:    "SNMetamorph",
-		Model:           "icecast2mqtt",
+		Model:           origin.Name,
 	}
 
 	for _, s := range serverMetrics {
@@ -115,6 +115,7 @@ func (p *Publisher) PostHADeviceDiscovery(baseTopic string, prefix string, cfg c
 				UnitOfMeasurement: s.Unit,
 				Icon:              s.Icon,
 				Device:            device,
+				Origin:            &origin,
 			}
 
 			data, err := json.Marshal(payload)
